@@ -157,3 +157,35 @@ main( pose, args ){
 ```
 
 `WARNING: unused object 'design'`
+
+#### More Conversions
+```c++
+main( pose, args ){
+  SIMPLE_METRIC refscore = $lib::ref2015;
+  FILTER f = ${ cutoff="0.1", comparison_type="lt" } refscore;
+  f.apply( pose );
+}
+```
+
+Creates
+```xml
+<ROSETTASCRIPTS>
+    <SCOREFXNS>        
+        <ScoreFunction name="lib_ref2015" weights="ref2015"/>
+    </SCOREFXNS>
+    
+    <SIMPLE_METRICS>
+        <TotalEnergyMetric name="refscore" scorefxn="lib_ref2015"/>
+    </SIMPLE_METRICS>
+
+    <FILTERS>
+        <SimpleMetricFilter name="f" metric="refscore" cutoff="0.1" comparison_type="lt"/>
+    </FILTERS>
+  
+    <PROTOCOLS>
+      <Add filter="f"/>
+    </PROTOCOLS>
+        
+    <OUTPUT scorefxn="commandline"/>
+</ROSETTASCRIPTS>
+```
