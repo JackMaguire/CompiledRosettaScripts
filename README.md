@@ -4,14 +4,13 @@
 
 Example:
 ```c++
-main( pose, args ){
+ScoreFunction main( pose, args ){
 
-  SCOREFXN sfxn1 = ScoreFunction( weights="beta_cst", symmetric="1" );
-  sfxn1.Reweight( scoretype="coordinate_constraint", weight="0.5" );
+  ScoreFunction sfxn1 = ScoreFunction( weights="beta_cst", symmetric="1" );
 
-  SCOREFXN sfxn2 = lib::ref2015;
+  ScoreFunction sfxn2 = lib::ref2015;
 
-  MOVER design = FastDesign( task_operations=[ lib::include_current, lib::ex1ex2 ] );
+  Mover design = FastDesign( task_operations=[ lib::include_current, lib::ex1ex2 ] );
 
   if( args::use_ref2015 ){
     design.scorefxn = sfxn2;
@@ -21,14 +20,13 @@ main( pose, args ){
 
   design.apply( pose );
   
-  // dollar-sign applies an implicit wrapper, if it is available
-  SIMPLE_METRIC refscore = $sfxn2;
+  SimpleMetric refscore = lib::sf2sm( sfxn2 );
   
-  SIMPLE_METRIC rescore_shallow_copy = refscore;
-  SIMPLE_METRIC rescore_deep_copy = &refscore;
+  SimpleMetric rescore_shallow_copy = refscore;
+  SimpleMetric rescore_deep_copy = &refscore;
   rescore_deep_copy.scoretype = "fa_rep";
   
-  RESIDUE_SELECTOR chainA = Chain( chains="A" );
+  ResidueSelector chainA = Chain( chains="A" );
   
   //# pound-sign comments are included in the XML ahead of the next object being modified or applied
   refscore.residue_selector = chainA;
@@ -39,7 +37,7 @@ main( pose, args ){
   //# another example of a comment
   rescore_deep_copy.apply( pose );
   
-  OUTPUT design.scorefxn;
+  return design.scorefxn;
 }
 ```
 
@@ -96,18 +94,18 @@ Note the compiler is able to completely exclude:
 
 #### Functions
 ```c++
-SCOREFXN enable_csts( SCOREFXN sfxn ){
-  SCOREFXN sfxn2 = sfxn;
+ScoreFunction enable_csts( SCOREFXN sfxn ){
+  ScoreFunction sfxn2 = sfxn;
   sfxn2.Reweight( scoretype="coordinate_constraint", weight="0" );
   sfxn2.Reweight( scoretype="sequence_constraint", weight="0" );
   return sfxn2;
 }
 
-main( pose, args ){
-  MOVER design = FastDesign( task_operations=[ lib::include_current, lib::ex1ex2 ], scorefxn=lib::ref2015_cst );
+ScoreFunction main( pose, args ){
+  Mover design = FastDesign( task_operations=[ lib::include_current, lib::ex1ex2 ], scorefxn=lib::ref2015_cst );
   design.apply( pose );
   
-  OUTPUT disable_csts( design.scorefxn );
+  return disable_csts( design.scorefxn );
 }
 ```
 
@@ -143,16 +141,16 @@ Creates:
 
 #### Warnings
 ```c++
-SCOREFXN enable_csts( SCOREFXN sfxn ){
-  SCOREFXN sfxn2 = sfxn;
+ScoreFunction enable_csts( ScoreFunction sfxn ){
+  ScoreFunction sfxn2 = sfxn;
   sfxn2.Reweight( scoretype="coordinate_constraint", weight="0" );
   sfxn2.Reweight( scoretype="sequence_constraint", weight="0" );
   return sfxn2;
 }
 
-main( pose, args ){
-  MOVER design = FastDesign( task_operations=[ lib::include_current, lib::ex1ex2 ], scorefxn=lib::ref2015_cst );
-  OUTPUT disable_csts( design.scorefxn );
+ScoreFunction main( pose, args ){
+  Mover design = FastDesign( task_operations=[ lib::include_current, lib::ex1ex2 ], scorefxn=lib::ref2015_cst );
+  return disable_csts( design.scorefxn );
 }
 ```
 
@@ -160,9 +158,9 @@ main( pose, args ){
 
 #### More Conversions
 ```c++
-main( pose, args ){
-  SIMPLE_METRIC refscore = $lib::ref2015;
-  FILTER f = ${ cutoff="0.1", comparison_type="lt" } refscore;
+ScoreFunction main( pose, args ){
+  SimpleMetric refscore = lib::sf2sm( lib::ref2015 );
+  Filter f = lib::sm2f( sf=refscore, cutoff="0.1", comparison_type="lt" );
   f.apply( pose );
 }
 ```
